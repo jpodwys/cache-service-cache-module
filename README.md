@@ -109,12 +109,3 @@ Delete a key or an array of keys and their associated values.
 Flush all keys and values.
 
 * callback: type: function
-
-# More Node-Cache Methods
-
-If you need access to one of node-cache's other functions, you can get at the underlying [`node-cache` instance](https://github.com/tcs-de/nodecache) by tapping into the `.db` property like so:
-
-```javascript
-var underlyingNodeCacheInstance = nodeCacheModule.db;
-underlyingNodeCacheInstance.SOME_OTHER_NODE_CACHE_FUNCTION();
-```
