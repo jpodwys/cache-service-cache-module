@@ -82,7 +82,7 @@ function cacheModule(config){
       if(!self.readOnly){
         expiration = expiration || self.defaultExpiration;
         var exp = (expiration) ? (expiration * 1000) : self.defaultExpiration;
-        cache.expirations[key] = Date.now() + expiration;
+        cache.expirations[key] = Date.now() + exp;
         cache.db[key] = value;
         if(cb) cb();
       }
@@ -120,12 +120,19 @@ function cacheModule(config){
    */
   self.del = function(keys, cb){
     log(false, 'Attempting to delete keys:', {keys: keys});
-    for(var i = 0; i < keys.length; i++){
-      var key = keys[i];
-      cache.db[key] = undefined;
-      cache.expirations[key] = undefined;
+    if(typeof keys === 'object'){
+      for(var i = 0; i < keys.length; i++){
+        var key = keys[i];
+        cache.db[key] = undefined;
+        cache.expirations[key] = undefined;
+      }
+      if(cb) cb(null, keys.length);
     }
-    if(cb) cb();
+    else{
+      cache.db[keys] = undefined;
+      cache.expirations[keys] = undefined;
+      if(cb) cb(null, 1); 
+    }
   }
 
   /**
