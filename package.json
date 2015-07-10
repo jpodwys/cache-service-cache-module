@@ -1,0 +1,32 @@
+{
+  "name": "cache-service-cache-module",
+  "version": "0.1.0",
+  "description": "A cache plugin for cache-service.",
+  "main": "cacheModule.js",
+  "devDependencies": {
+    "mocha": "2.2.4",
+    "expect": "1.6.0"
+  },
+  "scripts": {
+    "test": "bin/tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpodwys/cache-service-cache-module.git"
+  },
+  "author": "Joe Podwys",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jpodwys/cache-service-cache-module/issues"
+  },
+  "homepage": "https://github.com/jpodwys/cache-service-cache-module#readme",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "cache-service",
+    "cache",
+    "node",
+    "cache-module"
+  ]
+}
