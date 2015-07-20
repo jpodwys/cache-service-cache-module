@@ -17,10 +17,30 @@ function cacheModule(config){
   self.defaultExpiration = config.defaultExpiration || 900;
   self.readOnly = (typeof config.readOnly === 'boolean') ? config.readOnly : false;
   self.checkOnPreviousEmpty = (typeof config.checkOnPreviousEmpty === 'boolean') ? config.checkOnPreviousEmpty : true;
-  var cache = {
-    db: {},
-    expirations: {}
-  };
+  //self.backgroundRefresh = (typeof config.backgroundRefresh === 'boolean') ? config.backgroundRefresh : false;
+  self.backgroundRefreshInterval = config.backgroundRefreshInterval || 60000;
+  self.backgroundRefreshTtl = config.backgroundRefreshTtl || 70000;
+  self.db = {};
+  self.expirations = {};
+  self.refreshKeys = {};
+
+  setInterval(function(){
+
+    for(key in self.refreshKeys){
+      if(self.refreshKeys.hasOwnProperty(key)){
+        var data = self.refreshKeys[key];
+        if(data.expiration - Date.now() < self.backgroundRefreshTtl){
+          data.refresh(function (err, response){
+            if(!err){
+              self.set(key, response, data.lifeSpan, data.refresh, noop);
+            }
+          });
+        }
+      }
+    }
+
+  }, self.backgroundRefreshInterval);
+
   log(false, 'Cache-module client created with the following defaults:', {expiration: this.expiration, verbose: this.verbose, readOnly: this.readOnly});
 
   /**
@@ -35,9 +55,9 @@ function cacheModule(config){
       var cacheKey = (cleanKey) ? cleanKey : key;
       log(false, 'Attempting to get key:', {key: cacheKey});
       var now = Date.now();
-      var expiration = cache.expirations[key] || this.defaultExpiration;
+      var expiration = self.expirations[key] || this.defaultExpiration;
       if(expiration && expiration > now){
-        cb(null, cache.db[key]);
+        cb(null, self.db[key]);
       }
       else{
         self.del(key);
@@ -76,19 +96,29 @@ function cacheModule(config){
    * @param {integer} expiration
    * @param {function} cb
    */
-  self.set = function(key, value, expiration, cb){
+  self.set = function(){
+
+    var key = arguments[0];
+    var value = arguments[1];
+    var expiration = arguments[2] || null;
+    var refresh = (arguments.length == 5) ? arguments[3] : null;
+    var cb = (arguments.length == 5) ? arguments[4] : arguments[3];
+
     log(false, 'Attempting to set key:', {key: key, value: value});
-    try {
+    //try {
       if(!self.readOnly){
-        expiration = expiration || self.defaultExpiration;
-        var exp = (expiration) ? (expiration * 1000) : self.defaultExpiration;
-        cache.expirations[key] = Date.now() + exp;
-        cache.db[key] = value;
+        expiration = (expiration) ? (expiration * 1000) : self.defaultExpiration;
+        var exp = expiration + Date.now();
+        self.expirations[key] = exp;
+        self.db[key] = value;
         if(cb) cb();
+        if(refresh){
+          self.refreshKeys[key] = {expiration: exp, lifeSpan: expiration, refresh: refresh};
+        }
       }
-    } catch (err) {
-      log(true, 'Set failed for cache of type ' + self.type, {name: 'NodeCacheSetException', message: err});
-    }
+    //} catch (err) {
+    //  log(true, 'Set failed for cache of type ' + self.type, {name: 'CacheModuleSetException', message: err});
+    //}
   }
 
   /**
@@ -123,14 +153,14 @@ function cacheModule(config){
     if(typeof keys === 'object'){
       for(var i = 0; i < keys.length; i++){
         var key = keys[i];
-        cache.db[key] = undefined;
-        cache.expirations[key] = undefined;
+        self.db[key] = undefined;
+        self.expirations[key] = undefined;
       }
       if(cb) cb(null, keys.length);
     }
     else{
-      cache.db[keys] = undefined;
-      cache.expirations[keys] = undefined;
+      self.db[keys] = undefined;
+      self.expirations[keys] = undefined;
       if(cb) cb(null, 1); 
     }
   }
@@ -141,8 +171,8 @@ function cacheModule(config){
    */
   self.flush = function(cb){
     log(false, 'Attempting to flush all data.');
-    cache.db = {};
-    cache.expirations = {};
+    self.db = {};
+    self.expirations = {};
     if(cb) cb();
   }
 
@@ -159,6 +189,8 @@ function cacheModule(config){
       else console.log(indentifier + message);
     }
   }
+
+  function noop(){}
 }
 
 module.exports = cacheModule;

@@ -1,6 +1,6 @@
 var expect = require('expect');
 var cModule = require('../../cacheModule');
-var cacheModule = new cModule();
+var cacheModule = new cModule({backgroundRefreshInterval: 500});
 
 var key = 'key';
 var value = 'value';
@@ -10,6 +10,25 @@ beforeEach(function(){
 });
 
 describe('cacheModule Tests', function () {
+
+  it('Using autorefresh', function (done) {
+
+    var refresh = function(cb){
+      cb(null, 1);
+    }
+
+    cacheModule.set(key, value, 1, refresh, function (err, result){
+      
+      setTimeout(function(){
+        cacheModule.get(key, function (err, response){
+          expect(response).toBe(1);
+          done();
+        });
+      }, 1500);
+
+    });
+  });
+
   it('Getting absent key should return null', function (done) {
     cacheModule.get(key, function (err, result){
       expect(result).toBe(null);
