@@ -69,7 +69,7 @@ describe('cacheModule Tests', function () {
       done();
     });
   });
-  it('Using background refresh shoult reset a nearly expired key', function (done) {
+  it('Using background refresh should reset a nearly expired key', function (done) {
     var refresh = function(cb){
       cb(null, 1);
     }
