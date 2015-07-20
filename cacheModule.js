@@ -2,11 +2,14 @@
  * cacheModule constructor
  * @constructor
  * @param config: {
- *    type:                 {string | 'cache-module'}
- *    verbose:              {boolean | false},
- *    expiration:           {integer | 900},
- *    readOnly:             {boolean | false},
- *    checkOnPreviousEmpty  {boolean | true}
+ *    type:                     {string | 'cache-module'}
+ *    verbose:                  {boolean | false},
+ *    expiration:               {integer | 900},
+ *    readOnly:                 {boolean | false},
+ *    checkOnPreviousEmpty      {boolean | true},
+ *    backgroundRefreshEnabled  {boolean | true},
+ *    backgroundRefreshInterval {integer | 60000},
+ *    backgroundRefreshMinTtl   {integer | 70000}
  * }
  */
 function cacheModule(config){
@@ -33,6 +36,10 @@ function cacheModule(config){
   }
 
   log(false, 'Cache-module client created with the following defaults:', {expiration: this.expiration, verbose: this.verbose, readOnly: this.readOnly});
+
+  /**
+   ******************************************* PUBLIC FUNCTIONS *******************************************
+   */
 
   /**
    * Get the value associated with a given key
@@ -85,6 +92,7 @@ function cacheModule(config){
    * @param {string} key
    * @param {string | object} value
    * @param {integer} expiration
+   * @param {function} refresh
    * @param {function} cb
    */
   self.set = function(){
@@ -169,6 +177,10 @@ function cacheModule(config){
     cache.refreshKeys = {};
     if(cb) cb();
   }
+
+  /**
+   ******************************************* PRIVATE FUNCTIONS *******************************************
+   */
 
   /**
    * Refreshes all keys that were set with a refresh function
