@@ -152,16 +152,16 @@ function cacheModule(config){
     if(typeof keys === 'object'){
       for(var i = 0; i < keys.length; i++){
         var key = keys[i];
-        cache.db[key] = undefined;
-        cache.expirations[key] = undefined;
-        cache.refreshKeys[key] = undefined;
+        delete cache.db[key];
+        delete cache.expirations[key];
+        delete cache.refreshKeys[key];
       }
       if(cb) cb(null, keys.length);
     }
     else{
-      cache.db[keys] = undefined;
-      cache.expirations[keys] = undefined;
-      cache.refreshKeys[keys] = undefined;
+      delete cache.db[keys];
+      delete cache.expirations[keys];
+      delete cache.refreshKeys[keys];
       if(cb) cb(null, 1); 
     }
   }
