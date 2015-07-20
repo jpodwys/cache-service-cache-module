@@ -10,25 +10,6 @@ beforeEach(function(){
 });
 
 describe('cacheModule Tests', function () {
-
-  it('Using autorefresh', function (done) {
-
-    var refresh = function(cb){
-      cb(null, 1);
-    }
-
-    cacheModule.set(key, value, 1, refresh, function (err, result){
-      
-      setTimeout(function(){
-        cacheModule.get(key, function (err, response){
-          expect(response).toBe(1);
-          done();
-        });
-      }, 1500);
-
-    });
-  });
-
   it('Getting absent key should return null', function (done) {
     cacheModule.get(key, function (err, result){
       expect(result).toBe(null);
@@ -86,6 +67,19 @@ describe('cacheModule Tests', function () {
       expect(response.key3).toBe('value3');
       expect(response.key4).toBe(undefined);
       done();
+    });
+  });
+  it('Using background refresh shoult reset a nearly expired key', function (done) {
+    var refresh = function(cb){
+      cb(null, 1);
+    }
+    cacheModule.set(key, value, 1, refresh, function (err, result){ 
+      setTimeout(function(){
+        cacheModule.get(key, function (err, response){
+          expect(response).toBe(1);
+          done();
+        });
+      }, 1500);
     });
   });
 });

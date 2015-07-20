@@ -17,29 +17,20 @@ function cacheModule(config){
   self.defaultExpiration = config.defaultExpiration || 900;
   self.readOnly = (typeof config.readOnly === 'boolean') ? config.readOnly : false;
   self.checkOnPreviousEmpty = (typeof config.checkOnPreviousEmpty === 'boolean') ? config.checkOnPreviousEmpty : true;
-  //self.backgroundRefresh = (typeof config.backgroundRefresh === 'boolean') ? config.backgroundRefresh : false;
+  self.backgroundRefreshEnabled = (typeof config.backgroundRefreshEnabled === 'boolean') ? config.backgroundRefreshEnabled : true;
   self.backgroundRefreshInterval = config.backgroundRefreshInterval || 60000;
-  self.backgroundRefreshTtl = config.backgroundRefreshTtl || 70000;
-  self.db = {};
-  self.expirations = {};
-  self.refreshKeys = {};
+  self.backgroundRefreshMinTtl = config.backgroundRefreshMinTtl || 70000;
+  var cache = {
+    db: {},
+    expirations: {},
+    refreshKeys: {}
+  };
 
-  setInterval(function(){
-
-    for(key in self.refreshKeys){
-      if(self.refreshKeys.hasOwnProperty(key)){
-        var data = self.refreshKeys[key];
-        if(data.expiration - Date.now() < self.backgroundRefreshTtl){
-          data.refresh(function (err, response){
-            if(!err){
-              self.set(key, response, data.lifeSpan, data.refresh, noop);
-            }
-          });
-        }
-      }
-    }
-
-  }, self.backgroundRefreshInterval);
+  if(self.backgroundRefreshEnabled){
+    setInterval(function(){
+      backgroundRefresh();
+    }, self.backgroundRefreshInterval);
+  }
 
   log(false, 'Cache-module client created with the following defaults:', {expiration: this.expiration, verbose: this.verbose, readOnly: this.readOnly});
 
@@ -55,9 +46,9 @@ function cacheModule(config){
       var cacheKey = (cleanKey) ? cleanKey : key;
       log(false, 'Attempting to get key:', {key: cacheKey});
       var now = Date.now();
-      var expiration = self.expirations[key] || this.defaultExpiration;
+      var expiration = cache.expirations[key] || this.defaultExpiration;
       if(expiration && expiration > now){
-        cb(null, self.db[key]);
+        cb(null, cache.db[key]);
       }
       else{
         self.del(key);
@@ -105,20 +96,20 @@ function cacheModule(config){
     var cb = (arguments.length == 5) ? arguments[4] : arguments[3];
 
     log(false, 'Attempting to set key:', {key: key, value: value});
-    //try {
+    try {
       if(!self.readOnly){
         expiration = (expiration) ? (expiration * 1000) : self.defaultExpiration;
         var exp = expiration + Date.now();
-        self.expirations[key] = exp;
-        self.db[key] = value;
+        cache.expirations[key] = exp;
+        cache.db[key] = value;
         if(cb) cb();
         if(refresh){
-          self.refreshKeys[key] = {expiration: exp, lifeSpan: expiration, refresh: refresh};
+          cache.refreshKeys[key] = {expiration: exp, lifeSpan: expiration, refresh: refresh};
         }
       }
-    //} catch (err) {
-    //  log(true, 'Set failed for cache of type ' + self.type, {name: 'CacheModuleSetException', message: err});
-    //}
+    } catch (err) {
+      log(true, 'Set failed for cache of type ' + self.type, {name: 'CacheModuleSetException', message: err});
+    }
   }
 
   /**
@@ -153,14 +144,16 @@ function cacheModule(config){
     if(typeof keys === 'object'){
       for(var i = 0; i < keys.length; i++){
         var key = keys[i];
-        self.db[key] = undefined;
-        self.expirations[key] = undefined;
+        cache.db[key] = undefined;
+        cache.expirations[key] = undefined;
+        cache.refreshKeys[key] = undefined;
       }
       if(cb) cb(null, keys.length);
     }
     else{
-      self.db[keys] = undefined;
-      self.expirations[keys] = undefined;
+      cache.db[keys] = undefined;
+      cache.expirations[keys] = undefined;
+      cache.refreshKeys[keys] = undefined;
       if(cb) cb(null, 1); 
     }
   }
@@ -171,9 +164,28 @@ function cacheModule(config){
    */
   self.flush = function(cb){
     log(false, 'Attempting to flush all data.');
-    self.db = {};
-    self.expirations = {};
+    cache.db = {};
+    cache.expirations = {};
+    cache.refreshKeys = {};
     if(cb) cb();
+  }
+
+  /**
+   * Refreshes all keys that were set with a refresh function
+   */
+  function backgroundRefresh(){
+    for(key in cache.refreshKeys){
+      if(cache.refreshKeys.hasOwnProperty(key)){
+        var data = cache.refreshKeys[key];
+        if(data.expiration - Date.now() < self.backgroundRefreshMinTtl){
+          data.refresh(function (err, response){
+            if(!err){
+              self.set(key, response, data.lifeSpan, data.refresh, noop);
+            }
+          });
+        }
+      }
+    }
   }
 
   /**
