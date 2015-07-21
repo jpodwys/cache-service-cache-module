@@ -53,8 +53,8 @@ function cacheModule(config){
       var cacheKey = (cleanKey) ? cleanKey : key;
       log(false, 'Attempting to get key:', {key: cacheKey});
       var now = Date.now();
-      var expiration = cache.expirations[key] || this.defaultExpiration;
-      if(expiration && expiration > now){
+      var expiration = cache.expirations[key];
+      if(expiration > now){
         cb(null, cache.db[key]);
       }
       else{
