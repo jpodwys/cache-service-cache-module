@@ -58,7 +58,7 @@ function cacheModule(config){
         cb(null, cache.db[key]);
       }
       else{
-        self.del(key);
+        expire(key);
         cb(null, null);
       }
 
@@ -179,6 +179,15 @@ function cacheModule(config){
   /**
    ******************************************* PRIVATE FUNCTIONS *******************************************
    */
+
+  /**
+   * Delete a given key from cache.db and cache.expirations but not from cache.refreshKeys
+   * @param {string} key
+   */
+  function expire(key){
+    delete cache.db[key];
+    delete cache.expirations[key];
+  }
 
   /**
    * Refreshes all keys that were set with a refresh function
