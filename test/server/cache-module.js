@@ -1,6 +1,9 @@
 var expect = require('expect');
 var cModule = require('../../cacheModule');
-var cacheModule = new cModule({backgroundRefreshInterval: 500});
+var cacheModule = new cModule({
+  backgroundRefreshEnabled: true,
+  backgroundRefreshInterval: 500
+});
 
 var key = 'key';
 var value = 'value';
