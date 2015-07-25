@@ -3,6 +3,15 @@
 * A bare-bones cache plugin for [cache-service](https://github.com/jpodwys/cache-service)
 * AND a standalone in-memory cache
 
+#### Features
+
+* Background refresh
+* No external dependencies
+* Robust API
+* Excellent `.mset()` implementation which allows you to set expirations on a per key, per function call, and/or per `cache-service-cache-module` instance basis.
+* Built-in logging with a `verbose` flag.
+* Compatible with `cache-service` and `superagent-cache`
+
 # Basic Usage
 
 Require and instantiate
@@ -37,11 +46,41 @@ An arbitrary identifier you can assign so you know which cache is responsible fo
 
 ## defaultExpiration
 
-The expiration to include when executing cache set commands. Can be overridden via `.set()`'s optional expiraiton param.
+The expiration to include when executing cache set commands. Can be overridden via `.set()`'s optional `expiraiton` param.
 
 * type: int
 * default: 900
 * measure: seconds
+
+## backgroundRefreshEnabled
+
+Whether the background refresh feature is enabled. For a more thorough explanation on `background refresh`, see the [Using Background Refresh](#using-background-refresh) section.
+
+* type: boolean
+* default: false
+
+## backgroundRefreshInterval
+
+How frequently should all background refresh-enabled keys be scanned to determine whether they should be refreshed.
+
+* type: int
+* default: 60000
+* measure: milliseconds
+
+## backgroundRefreshMinTtl
+
+The maximum ttl a scanned background refresh-enabled key can have without triggering a refresh. This number should always be greater than `backgroundRefreshInterval`.
+
+* type: int
+* default: 70000
+* measure: milliseconds
+
+## backgroundRefreshIntervalCheck
+
+Whether to throw an exception if `backgroundRefreshInterval` is greater than `backgroundRefreshMinTtl`. Setting this property to false is highly discouraged.
+
+* type: boolean
+* default: true
 
 ## verbose
 
@@ -74,13 +113,16 @@ Retrieve the values belonging to a series of keys. If a key is not found, it wil
 * err: type: object
 * response: type: object, example: {key: 'value', key2: 'value2'...}
 
-## .set(key, value [, expiraiton, callback])
+## .set(key, value, [expiraiton], [refresh], [callback])
+
+> See the [Using Background Refresh](#using-background-refresh) section for more about the `refresh` and `callback` params.
 
 Set a value by a given key.
 
 * key: type: string
-* callback: type: function
+* value: type: string || objects
 * expiration: type: int, measure: seconds
+* refresh: type: function
 * callback: type: function
 
 ## .mset(obj [, expiration, callback])
@@ -95,7 +137,7 @@ This function exposes a heirarchy of expiration values as follows:
 * If an object with both `cacheValue` and `expiration` as properties is not present, the `expiration` provided to the `.mset()` argument list will be used.
 * If neither of the above is provided, each cache's `defaultExpiration` will be applied.
 
-## .del(keys [, callback (err, count)])
+## .del(keys, [callback (err, count)])
 
 Delete a key or an array of keys and their associated values.
 
@@ -109,3 +151,5 @@ Delete a key or an array of keys and their associated values.
 Flush all keys and values.
 
 * callback: type: function
+
+# Using Background Refresh
