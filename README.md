@@ -113,7 +113,7 @@ Retrieve the values belonging to a series of keys. If a key is not found, it wil
 * err: type: object
 * response: type: object, example: {key: 'value', key2: 'value2'...}
 
-## .set(key, value, [expiraiton], [refresh], [callback])
+## .set(key, value, [expiraiton], [refresh(cb)], [callback])
 
 > See the [Using Background Refresh](#using-background-refresh) section for more about the `refresh` and `callback` params.
 
