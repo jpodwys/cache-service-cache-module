@@ -27,15 +27,9 @@ Cache!
 cacheModule.set('key', 'value');
 ```
 
-# Benefits of Using `cache-service-cache-module`
-
-If you're using `cache-service-cache-module` with `cache-service`, the benefits are obvious. However, there are also a couple of reasons you might like it as a standalone in-memory cache module:
-
-* No external dependencies.
-* It features an excellent `.mset()` implementation which allows you to set expirations on a per key, per function call, and/or per `cache-service-cache-module` instance basis.
-* Built-in logging with a `verbose` flag.
-
 # Cache Module Configuration Options
+
+The constructor takes a config object with none or all of the following properties:
 
 ## type
 
