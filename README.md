@@ -29,7 +29,7 @@ cacheModule.set('key', 'value');
 
 # Cache Module Configuration Options
 
-The constructor takes a config object with none or all of the following properties:
+`cache-service-cache-module`'s constructor takes an optional config object with any number of the following properties:
 
 ## type
 
@@ -147,3 +147,43 @@ Flush all keys and values.
 * callback: type: function
 
 # Using Background Refresh
+
+With a typical cache setup, you're left to find the perfect compromise between having a long expiration so that users don't have to suffer through the worst case load time, and a short expiration so data doesn't get stale. `cache-service-cache-module` eliminates the need to worry about users suffering through the longest wait time by automatically refreshing keys for you. Here's how it works:
+
+#### Setup
+
+By default, background refresh is off. Turn it on in your `cacheModuleConfig`.
+
+```javascript
+var cModule = require('cache-service-cache-module');
+var cacheModule = new cModule({backgroundRefreshEnabled: true});
+```
+
+#### Configure
+
+Once background refresh is enabled, there are three options you can manipulate. See the API section for more information on them.
+
+* `backgroundRefreshInterval`
+* `backgroundRefreshMinTtl`
+* `backgroundRefreshIntervalCheck`
+
+#### Use
+
+Background refresh is exposed via the `.set()` command as follows:
+
+```javascript
+cacheModule.set('key', 'value', 300, refresh, cb);
+```
+
+If you want to pass `refresh`, you must also pass `cb` because if only four params are passed, `cache-service-cache-module` will assume the fourth param is `cb`.
+
+#### The Refresh Param
+
+The `refresh` param MUST be a function that accepts a callback and passes `err` and `response` to it as follows:
+
+```javascript
+var refresh = function(cb){
+  var response = goGetData();
+  cb(null, response);
+}
+```
