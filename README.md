@@ -8,9 +8,9 @@
 * Background refresh
 * No external dependencies
 * Robust API
-* Excellent `.mset()` implementation which allows you to set expirations on a per key, per function call, and/or per `cache-service-cache-module` instance basis.
 * Built-in logging with a `verbose` flag.
 * Compatible with `cache-service` and `superagent-cache`
+* Excellent `.mset()` implementation which allows you to set expirations on a per key, per function call, and/or per `cache-service-cache-module` instance basis.
 
 # Basic Usage
 
