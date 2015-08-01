@@ -46,16 +46,9 @@ The expiration to include when executing cache set commands. Can be overridden v
 * default: 900
 * measure: seconds
 
-## backgroundRefreshEnabled
-
-Whether the background refresh feature is enabled. For a more thorough explanation on `background refresh`, see the [Using Background Refresh](#using-background-refresh) section.
-
-* type: boolean
-* default: false
-
 ## backgroundRefreshInterval
 
-How frequently should all background refresh-enabled keys be scanned to determine whether they should be refreshed.
+How frequently should all background refresh-enabled keys be scanned to determine whether they should be refreshed. For a more thorough explanation on `background refresh`, see the [Using Background Refresh](#using-background-refresh) section.
 
 * type: int
 * default: 60000
@@ -150,18 +143,13 @@ Flush all keys and values.
 
 With a typical cache setup, you're left to find the perfect compromise between having a long expiration so that users don't have to suffer through the worst case load time, and a short expiration so data doesn't get stale. `cache-service-cache-module` eliminates the need to worry about users suffering through the longest wait time by automatically refreshing keys for you. Here's how it works:
 
-#### Setup
+#### How do I turn it on?
 
-By default, background refresh is off. Turn it on in your `cacheModuleConfig`.
-
-```javascript
-var cModule = require('cache-service-cache-module');
-var cacheModule = new cModule({backgroundRefreshEnabled: true});
-```
+By default, background refresh is off. It will turn itself on the first time you pass a `refresh` param to `.set()`.
 
 #### Configure
 
-Once background refresh is enabled, there are three options you can manipulate. See the API section for more information on them.
+There are three options you can manipulate. See the API section for more information about them.
 
 * `backgroundRefreshInterval`
 * `backgroundRefreshMinTtl`
