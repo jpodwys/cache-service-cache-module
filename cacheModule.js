@@ -7,7 +7,6 @@
  *    expiration:                     {integer | 900},
  *    readOnly:                       {boolean | false},
  *    checkOnPreviousEmpty            {boolean | true},
- *    backgroundRefreshEnabled        {boolean | false},
  *    backgroundRefreshIntervalCheck  {boolean | true},
  *    backgroundRefreshInterval       {integer | 60000},
  *    backgroundRefreshMinTtl         {integer | 70000}
@@ -21,7 +20,6 @@ function cacheModule(config){
   self.defaultExpiration = config.defaultExpiration || 900;
   self.readOnly = (typeof config.readOnly === 'boolean') ? config.readOnly : false;
   self.checkOnPreviousEmpty = (typeof config.checkOnPreviousEmpty === 'boolean') ? config.checkOnPreviousEmpty : true;
-  self.backgroundRefreshEnabled = (typeof config.backgroundRefreshEnabled === 'boolean') ? config.backgroundRefreshEnabled : false;
   self.backgroundRefreshIntervalCheck = (typeof config.backgroundRefreshIntervalCheck === 'boolean') ? config.backgroundRefreshIntervalCheck : true;
   self.backgroundRefreshInterval = config.backgroundRefreshInterval || 60000;
   self.backgroundRefreshMinTtl = config.backgroundRefreshMinTtl || 70000;
@@ -30,17 +28,7 @@ function cacheModule(config){
     expirations: {},
     refreshKeys: {}
   };
-
-  if(self.backgroundRefreshEnabled){
-    if(self.backgroundRefreshIntervalCheck){
-      if(self.backgroundRefreshInterval > self.backgroundRefreshMinTtl){
-        throw new exception('BACKGROUND_REFRESH_INTERVAL_EXCEPTION', 'backgroundRefreshInterval cannot be greater than backgroundRefreshMinTtl.');
-      }
-    }
-    setInterval(function(){
-      backgroundRefresh();
-    }, self.backgroundRefreshInterval);
-  }
+  var backgroundRefreshEnabled = false;
 
   log(false, 'Cache-module client created with the following defaults:', {expiration: this.expiration, verbose: this.verbose, readOnly: this.readOnly});
 
@@ -126,6 +114,9 @@ function cacheModule(config){
         if(cb) cb();
         if(refresh){
           cache.refreshKeys[key] = {expiration: exp, lifeSpan: expiration, refresh: refresh};
+          if(!backgroundRefreshEnabled){
+            backgroundRefreshInit();
+          }
         }
       }
     } catch (err) {
@@ -208,6 +199,23 @@ function cacheModule(config){
   function expire(key){
     delete cache.db[key];
     delete cache.expirations[key];
+  }
+
+  /**
+   * Initialize background refresh
+   */
+  function backgroundRefreshInit(){
+    if(!backgroundRefreshEnabled){
+      backgroundRefreshEnabled = true;
+      if(self.backgroundRefreshIntervalCheck){
+        if(self.backgroundRefreshInterval > self.backgroundRefreshMinTtl){
+          throw new exception('BACKGROUND_REFRESH_INTERVAL_EXCEPTION', 'backgroundRefreshInterval cannot be greater than backgroundRefreshMinTtl.');
+        }
+      }
+      setInterval(function(){
+        backgroundRefresh();
+      }, self.backgroundRefreshInterval);
+    }
   }
 
   /**

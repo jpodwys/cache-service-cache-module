@@ -1,7 +1,6 @@
 var expect = require('expect');
 var cModule = require('../../cacheModule');
 var cacheModule = new cModule({
-  backgroundRefreshEnabled: true,
   backgroundRefreshInterval: 500
 });
 
