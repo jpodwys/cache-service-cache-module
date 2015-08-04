@@ -1,6 +1,8 @@
 var expect = require('expect');
 var cModule = require('../../cacheModule');
-var cacheModule = new cModule();
+var cacheModule = new cModule({
+  backgroundRefreshInterval: 500
+});
 
 var key = 'key';
 var value = 'value';
@@ -67,6 +69,19 @@ describe('cacheModule Tests', function () {
       expect(response.key3).toBe('value3');
       expect(response.key4).toBe(undefined);
       done();
+    });
+  });
+  it('Using background refresh should reset a nearly expired key', function (done) {
+    var refresh = function(key, cb){
+      cb(null, 1);
+    }
+    cacheModule.set(key, value, 1, refresh, function (err, result){ 
+      setTimeout(function(){
+        cacheModule.get(key, function (err, response){
+          expect(response).toBe(1);
+          done();
+        });
+      }, 1500);
     });
   });
 });
