@@ -107,7 +107,7 @@ function cacheModule(config){
     log(false, '.set() called:', {key: key, value: value});
     try {
       if(!self.readOnly){
-        expiration = (expiration) ? (expiration * 1000) : self.defaultExpiration;
+        expiration = (expiration) ? (expiration * 1000) : (self.defaultExpiration * 1000);
         var exp = expiration + Date.now();
         cache.expirations[key] = exp;
         cache.db[key] = value;
@@ -228,7 +228,7 @@ function cacheModule(config){
         if(data.expiration - Date.now() < self.backgroundRefreshMinTtl){
           data.refresh(key, function (err, response){
             if(!err){
-              self.set(key, response, data.lifeSpan, data.refresh, noop);
+              self.set(key, response, (data.lifeSpan / 1000), data.refresh, noop);
             }
           });
         }
