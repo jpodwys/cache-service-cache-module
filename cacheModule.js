@@ -259,7 +259,7 @@ function cacheModule(config){
         if(data.expiration - Date.now() < self.backgroundRefreshMinTtl){
           data.refresh(key, function (err, response){
             if(!err){
-              self.set(key, response, (data.lifeSpan / 1000), data.refresh, noop);
+              self.set(key, response, (data.lifeSpan / 1000), data.refresh, function(){});
             }
           });
         }
@@ -279,8 +279,6 @@ function cacheModule(config){
       else console.log(self.type + message);
     }
   }
-
-  function noop(){}
 }
 
 module.exports = cacheModule;
