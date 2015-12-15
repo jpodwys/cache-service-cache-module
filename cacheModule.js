@@ -1,6 +1,5 @@
 /**
  * cacheModule constructor
- * @constructor
  * @param config: {
  *    type:                           {string  | 'cache-module'}
  *    verbose:                        {boolean | false},
