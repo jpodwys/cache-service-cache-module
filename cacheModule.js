@@ -10,7 +10,8 @@
  *    backgroundRefreshIntervalCheck  {boolean | true},
  *    backgroundRefreshInterval       {integer | 60000},
  *    backgroundRefreshMinTtl         {integer | 70000},
- *    storage                         {string  | null}
+ *    storage                         {string  | null},
+ *    storageMock                     {object  | null}
  * }
  */
 function cacheModule(config){
@@ -24,6 +25,7 @@ function cacheModule(config){
   self.backgroundRefreshIntervalCheck = (typeof config.backgroundRefreshIntervalCheck === 'boolean') ? config.backgroundRefreshIntervalCheck : true;
   self.backgroundRefreshInterval = config.backgroundRefreshInterval || 60000;
   self.backgroundRefreshMinTtl = config.backgroundRefreshMinTtl || 70000;
+  var storageMock = config.storageMock || false;
   var backgroundRefreshEnabled = false;
   var browser = (typeof window !== 'undefined');
   var storage = null;
@@ -194,11 +196,17 @@ function cacheModule(config){
    * Enable browser storage if desired and available
    */
   function setupBrowserStorage(){
-    if(browser){
-      var storageType = (config.storage && (config.storage === 'local' || config.storage === 'session')) ? config.storage : 'session';
-      storage = (typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
-      storageKey = 'cache-service-' + storageType + '-storage';
-      if(config.storage && storage){
+    if(browser || storageMock){
+      if(storageMock){
+        storage = storageMock;
+        storageKey = 'cache-service-storage-mock';
+      }
+      else{
+        var storageType = (config.storage && (config.storage === 'local' || config.storage === 'session')) ? config.storage : 'session';
+        storage = (typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
+        storageKey = 'cache-service-' + storageType + '-storage';
+      }
+      if((config.storage && storage) || storageMock){
         var db = storage.getItem(storageKey);
         try {
           cache = JSON.parse(db) || cache;
@@ -214,7 +222,7 @@ function cacheModule(config){
    * Overwrite namespaced browser storage with current cache
    */
   function overwriteBrowserStorage(){
-    if(browser && storage){
+    if((browser && storage) || storageMock){
       var db = cache;
       try {
         db = JSON.stringify(db);

@@ -1,7 +1,10 @@
 var expect = require('expect');
+var mockStorage = require('mock-localstorage');
+var storageMock = new mockStorage();
 var cModule = require('../../cacheModule');
 var cacheModule = new cModule({
-  backgroundRefreshInterval: 500
+  backgroundRefreshInterval: 500,
+  storageMock: storageMock
 });
 
 var key = 'key';
@@ -22,6 +25,8 @@ describe('cacheModule Tests', function () {
     cacheModule.set(key, value);
     cacheModule.get(key, function (err, result) {
       expect(result).toBe(value);
+      var data = storageMock.getItem('cache-service-storage-mock');
+      expect(data.indexOf('key')).toBeGreaterThan(-1);
       done();
     });
   });
@@ -30,6 +35,8 @@ describe('cacheModule Tests', function () {
     cacheModule.del(key);
     cacheModule.get(key, function (err, result) {
       expect(result).toBe(null);
+      var data = storageMock.getItem('cache-service-storage-mock');
+      expect(data.indexOf('key')).toBe(-1);
       done();
     });
   });
