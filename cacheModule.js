@@ -10,7 +10,7 @@
  *    backgroundRefreshIntervalCheck  {boolean | true},
  *    backgroundRefreshInterval       {integer | 60000},
  *    backgroundRefreshMinTtl         {integer | 70000},
- *    storage                         {string  | null},
+ *    storage                         {string  | null}
  * }
  */
 function cacheModule(config){
