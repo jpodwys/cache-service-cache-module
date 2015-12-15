@@ -2,14 +2,15 @@
  * cacheModule constructor
  * @constructor
  * @param config: {
- *    type:                           {string | 'cache-module'}
+ *    type:                           {string  | 'cache-module'}
  *    verbose:                        {boolean | false},
  *    expiration:                     {integer | 900},
  *    readOnly:                       {boolean | false},
  *    checkOnPreviousEmpty            {boolean | true},
  *    backgroundRefreshIntervalCheck  {boolean | true},
  *    backgroundRefreshInterval       {integer | 60000},
- *    backgroundRefreshMinTtl         {integer | 70000}
+ *    backgroundRefreshMinTtl         {integer | 70000},
+ *    storage                         {string  | null},
  * }
  */
 function cacheModule(config){
@@ -23,18 +24,16 @@ function cacheModule(config){
   self.backgroundRefreshIntervalCheck = (typeof config.backgroundRefreshIntervalCheck === 'boolean') ? config.backgroundRefreshIntervalCheck : true;
   self.backgroundRefreshInterval = config.backgroundRefreshInterval || 60000;
   self.backgroundRefreshMinTtl = config.backgroundRefreshMinTtl || 70000;
+  var backgroundRefreshEnabled = false;
+  var browser = (typeof window !== 'undefined');
+  var storage = null;
   var cache = {
     db: {},
     expirations: {},
     refreshKeys: {}
   };
-  var backgroundRefreshEnabled = false;
-
+  setupBrowserStorage();
   log(false, 'Cache-module client created with the following defaults:', {expiration: this.expiration, verbose: this.verbose, readOnly: this.readOnly});
-
-  /**
-   ******************************************* PUBLIC FUNCTIONS *******************************************
-   */
 
   /**
    * Get the value associated with a given key
@@ -44,7 +43,7 @@ function cacheModule(config){
    */
   self.get = function(key, cb, cleanKey){
     if(arguments.length < 2){
-      throw new exception('INCORRECT_ARGUMENT_EXCEPTION', '.get() requires 2 arguments.');
+      throw new Error('INCORRECT_ARGUMENT_EXCEPTION: .get() requires 2 arguments.');
     }
     log(false, 'get() called:', {key: key});
     try {
@@ -72,7 +71,7 @@ function cacheModule(config){
    */
   self.mget = function(keys, cb, index){
     if(arguments.length < 2){
-      throw new exception('INCORRECT_ARGUMENT_EXCEPTION', '.mget() requires 2 arguments.');
+      throw new Error('INCORRECT_ARGUMENT_EXCEPTION: .mget() requires 2 arguments.');
     }
     log(false, '.mget() called:', {keys: keys});
     var values = {};
@@ -97,7 +96,7 @@ function cacheModule(config){
    */
   self.set = function(){
     if(arguments.length < 2){
-      throw new exception('INCORRECT_ARGUMENT_EXCEPTION', '.set() requires a minimum of 2 arguments.');
+      throw new Error('INCORRECT_ARGUMENT_EXCEPTION: .set() requires a minimum of 2 arguments.');
     }
     var key = arguments[0];
     var value = arguments[1];
@@ -118,6 +117,7 @@ function cacheModule(config){
             backgroundRefreshInit();
           }
         }
+        overwriteBrowserStorage();
       }
     } catch (err) {
       log(true, '.set() failed for cache of type ' + self.type, {name: 'CacheModuleSetException', message: err});
@@ -132,7 +132,7 @@ function cacheModule(config){
    */
   self.mset = function(obj, expiration, cb){
     if(arguments.length < 1){
-      throw new exception('INCORRECT_ARGUMENT_EXCEPTION', '.mset() requires a minimum of 1 argument.');
+      throw new Error('INCORRECT_ARGUMENT_EXCEPTION: .mset() requires a minimum of 1 argument.');
     }
     log(false, '.mset() called:', {data: obj});
     for(key in obj){
@@ -156,7 +156,7 @@ function cacheModule(config){
    */
   self.del = function(keys, cb){
     if(arguments.length < 1){
-      throw new exception('INCORRECT_ARGUMENT_EXCEPTION', '.del() requires a minimum of 1 argument.');
+      throw new Error('INCORRECT_ARGUMENT_EXCEPTION: .del() requires a minimum of 1 argument.');
     }
     log(false, '.del() called:', {keys: keys});
     if(typeof keys === 'object'){
@@ -174,6 +174,7 @@ function cacheModule(config){
       delete cache.refreshKeys[keys];
       if(cb) cb(null, 1); 
     }
+    overwriteBrowserStorage();
   }
 
   /**
@@ -186,11 +187,41 @@ function cacheModule(config){
     cache.expirations = {};
     cache.refreshKeys = {};
     if(cb) cb();
+    overwriteBrowserStorage();
   }
 
   /**
-   ******************************************* PRIVATE FUNCTIONS *******************************************
+   * Enable browser storage if desired and available
    */
+  function setupBrowserStorage(){
+    if(browser){
+      var storageType = (config.storage && (config.storage === 'local' || config.storage === 'session')) ? config.storage : 'session';
+      storage = (typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
+      storageKey = 'cache-service-' + storageType + '-storage';
+      if(config.storage && storage){
+        var db = storage.getItem(storageKey);
+        try {
+          cache = JSON.parse(db) || cache;
+        } catch (err) { /* Do nothing */ }
+      }
+      else{
+        log(true, 'Browser storage is not supported by this browser. Defaulting to an in-memory cache.', {});
+      }
+    }
+  }
+
+  /**
+   * Overwrite namespaced browser storage with current cache
+   */
+  function overwriteBrowserStorage(){
+    if(browser && storage){
+      var db = cache;
+      try {
+        db = JSON.stringify(db);
+      } catch (err) { /* Do nothing */ }
+      storage.setItem(storageKey, db);
+    }
+  }
 
   /**
    * Delete a given key from cache.db and cache.expirations but not from cache.refreshKeys
@@ -199,6 +230,7 @@ function cacheModule(config){
   function expire(key){
     delete cache.db[key];
     delete cache.expirations[key];
+    overwriteBrowserStorage();
   }
 
   /**
@@ -209,7 +241,7 @@ function cacheModule(config){
       backgroundRefreshEnabled = true;
       if(self.backgroundRefreshIntervalCheck){
         if(self.backgroundRefreshInterval > self.backgroundRefreshMinTtl){
-          throw new exception('BACKGROUND_REFRESH_INTERVAL_EXCEPTION', 'backgroundRefreshInterval cannot be greater than backgroundRefreshMinTtl.');
+          throw new Error('BACKGROUND_REFRESH_INTERVAL_EXCEPTION: backgroundRefreshInterval cannot be greater than backgroundRefreshMinTtl.');
         }
       }
       setInterval(function(){
@@ -234,17 +266,6 @@ function cacheModule(config){
         }
       }
     }
-  }
-
-  /**
-   * Instantates an exception to be thrown
-   * @param {string} name
-   * @param {string} message
-   * @return {exception}
-   */
-  function exception(name, message){
-    this.name = name;
-    this.message = message;
   }
 
   /**
