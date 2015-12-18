@@ -193,7 +193,7 @@ function cacheModule(config){
       if(self.store){
         var db = self.store.getItem(storageKey);
         try {
-          cache = JSON.parse(db);
+          cache = JSON.parse(db) || cache;
         } catch (err) { /* Do nothing */ }
       }
       else{
@@ -206,7 +206,7 @@ function cacheModule(config){
    * Overwrite namespaced browser storage with current cache
    */
   function overwriteBrowserStorage(){
-    if((browser && storage) || storageMock){
+    if((browser && self.store) || storageMock){
       var db = cache;
       try {
         db = JSON.stringify(db);
@@ -275,7 +275,7 @@ function cacheModule(config){
    */
   function log(isError, message, data){
     if(self.verbose || isError){
-      if(data) console.log(self.type + message, data);
+      if(data) console.log(self.type + ': ' + message, data);
       else console.log(self.type + message);
     }
   }
