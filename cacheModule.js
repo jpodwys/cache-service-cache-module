@@ -183,12 +183,12 @@ function cacheModule(config){
     if(browser || storageMock){
       if(storageMock){
         self.store = storageMock;
-        storageKey = 'cache-service-storage-mock';
+        storageKey = 'cache-module-storage-mock';
       }
       else{
         var storageType = (config.storage && (config.storage === 'local' || config.storage === 'session')) ? config.storage : 'session';
         self.store = (typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
-        storageKey = 'cache-service-' + storageType + '-storage';
+        storageKey = 'cache-module-' + storageType + '-storage';
       }
       if(self.store){
         var db = self.store.getItem(storageKey);

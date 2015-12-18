@@ -25,7 +25,7 @@ describe('cacheModule Tests', function () {
     cacheModule.set(key, value);
     cacheModule.get(key, function (err, result) {
       expect(result).toBe(value);
-      var data = storageMock.getItem('cache-service-storage-mock');
+      var data = storageMock.getItem('cache-module-storage-mock');
       expect(data.indexOf('key')).toBeGreaterThan(-1);
       done();
     });
@@ -35,7 +35,7 @@ describe('cacheModule Tests', function () {
     cacheModule.del(key);
     cacheModule.get(key, function (err, result) {
       expect(result).toBe(null);
-      var data = storageMock.getItem('cache-service-storage-mock');
+      var data = storageMock.getItem('cache-module-storage-mock');
       expect(data.indexOf('key')).toBe(-1);
       done();
     });
