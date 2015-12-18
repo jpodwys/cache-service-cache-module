@@ -34,7 +34,7 @@ function cacheModule(config){
     refreshKeys: {}
   };
   setupBrowserStorage();
-  log(false, 'Cache-module client created with the following defaults:', {expiration: this.expiration, verbose: this.verbose, readOnly: this.readOnly});
+  log(false, 'Cache-module client created with the following defaults:', {type: self.type, defaultExpiration: self.defaultExpiration, verbose: self.verbose, readOnly: self.readOnly});
 
   /**
    * Get the value associated with a given key
