@@ -51,6 +51,10 @@ describe('cacheModule Tests', function () {
         expect(response).toBe(null);
         cacheModule.get(key, function (err, response){
           expect(response).toBe(null);
+          var data = storageMock.getItem('cache-module-storage-mock');
+          expect(data.indexOf(key)).toBe(-1);
+          expect(data.indexOf('key2')).toBe(-1);
+          expect(data.indexOf('key3')).toBe(-1);
           done();
         });
       });
@@ -75,6 +79,11 @@ describe('cacheModule Tests', function () {
       expect(response.key2).toBe('value2');
       expect(response.key3).toBe('value3');
       expect(response.key4).toBe(undefined);
+      var data = storageMock.getItem('cache-module-storage-mock');
+      expect(data.indexOf(key)).toBeGreaterThan(-1);
+      expect(data.indexOf('key2')).toBeGreaterThan(-1);
+      expect(data.indexOf('key3')).toBeGreaterThan(-1);
+      expect(data.indexOf('key4')).toBe(-1);
       done();
     });
   });
