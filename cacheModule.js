@@ -24,7 +24,7 @@ function cacheModule(config){
   self.backgroundRefreshIntervalCheck = (typeof config.backgroundRefreshIntervalCheck === 'boolean') ? config.backgroundRefreshIntervalCheck : true;
   self.backgroundRefreshInterval = config.backgroundRefreshInterval || 60000;
   self.backgroundRefreshMinTtl = config.backgroundRefreshMinTtl || 70000;
-  self.store = null;
+  var store = null;
   var storageMock = config.storageMock || false;
   var backgroundRefreshEnabled = false;
   var browser = (typeof window !== 'undefined');
@@ -182,16 +182,16 @@ function cacheModule(config){
   function setupBrowserStorage(){
     if(browser || storageMock){
       if(storageMock){
-        self.store = storageMock;
+        store = storageMock;
         storageKey = 'cache-module-storage-mock';
       }
       else{
         var storageType = (config.storage && (config.storage === 'local' || config.storage === 'session')) ? config.storage : 'session';
-        self.store = (typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
+        store = (typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
         storageKey = 'cache-module-' + storageType + '-storage';
       }
-      if(self.store){
-        var db = self.store.getItem(storageKey);
+      if(store){
+        var db = store.getItem(storageKey);
         try {
           cache = JSON.parse(db) || cache;
         } catch (err) { /* Do nothing */ }
@@ -206,12 +206,12 @@ function cacheModule(config){
    * Overwrite namespaced browser storage with current cache
    */
   function overwriteBrowserStorage(){
-    if((browser && self.store) || storageMock){
+    if((browser && store) || storageMock){
       var db = cache;
       try {
         db = JSON.stringify(db);
       } catch (err) { /* Do nothing */ }
-      self.store.setItem(storageKey, db);
+      store.setItem(storageKey, db);
     }
   }
 
