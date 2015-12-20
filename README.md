@@ -1,10 +1,11 @@
 # cache-service-cache-module
 
-* A bare-bones cache plugin for [cache-service](https://github.com/jpodwys/cache-service)
-* AND a standalone in-memory cache
+* A light-weight cache plugin for [superagent-cache](https://github.com/jpodwys/superagent-cache) and [cache-service](https://github.com/jpodwys/cache-service)
+* AND a standalone in-memory cache that's optionally backed by `localStorage` and `sessionStorage`
 
 #### Features
 
+* Optionally backed by localStorage and sessionStorage
 * Background refresh
 * No external dependencies
 * Robust API
@@ -18,7 +19,7 @@ Require and instantiate
 ```javascript
 var cModule = require('cache-service-cache-module');
 
-var cacheModuleConfig = {defaultExpiration: 60};
+var cacheModuleConfig = {storage: 'session', defaultExpiration: 60};
 var cacheModule = new cModule(cacheModuleConfig);
 ```
 
@@ -37,6 +38,13 @@ An arbitrary identifier you can assign so you know which cache is responsible fo
 
 * type: string
 * default: 'cache-module'
+
+## storage
+
+Indicates whether cacheModule's in-memory cache should be backed by `localStorage` or `sessionStorage`. The available options are 'local' and 'session'. If not set, or if running in node, it will default to an im-memory cache. When a browser storage is activated, cacheModule will still write to and read from an in-memory cache in the interest of speed, but at initialization it will load it's in-memory cache from browser storage and write all changes back to browser storage.
+
+* type: string
+* default: ''
 
 ## defaultExpiration
 
