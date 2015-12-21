@@ -42,7 +42,7 @@ function cacheModule(config){
    * @param {function} cb
    */
   self.get = function(key, cb){
-    checkMinParams((arguments.length < 2), 'ARGUMENT_EXCEPTION: .get() requires 2 arguments.');
+    throwErrorIf((arguments.length < 2), 'ARGUMENT_EXCEPTION: .get() requires 2 arguments.');
     log(false, 'get() called:', {key: key});
     try {
       var now = Date.now();
@@ -66,7 +66,7 @@ function cacheModule(config){
    * @param {integer} index
    */
   self.mget = function(keys, cb, index){
-    checkMinParams((arguments.length < 2), 'ARGUMENT_EXCEPTION: .mget() requires 2 arguments.');
+    throwErrorIf((arguments.length < 2), 'ARGUMENT_EXCEPTION: .mget() requires 2 arguments.');
     log(false, '.mget() called:', {keys: keys});
     var values = {};
     for(var i = 0; i < keys.length; i++){
@@ -89,7 +89,7 @@ function cacheModule(config){
    * @param {function} cb
    */
   self.set = function(){
-    checkMinParams((arguments.length < 2), 'ARGUMENT_EXCEPTION: .set() requires at least 2 arguments.');
+    throwErrorIf((arguments.length < 2), 'ARGUMENT_EXCEPTION: .set() requires at least 2 arguments.');
     var key = arguments[0];
     var value = arguments[1];
     var expiration = arguments[2] || null;
@@ -121,7 +121,7 @@ function cacheModule(config){
    * @param {function} cb
    */
   self.mset = function(obj, expiration, cb){
-    checkMinParams((arguments.length < 1), 'ARGUMENT_EXCEPTION: .mset() requires at least 1 argument.');
+    throwErrorIf((arguments.length < 1), 'ARGUMENT_EXCEPTION: .mset() requires at least 1 argument.');
     log(false, '.mset() called:', {data: obj});
     for(key in obj){
       if(obj.hasOwnProperty(key)){
@@ -143,7 +143,7 @@ function cacheModule(config){
    * @param {function} cb
    */
   self.del = function(keys, cb){
-    checkMinParams((arguments.length < 1), 'ARGUMENT_EXCEPTION: .del() requires at least 1 argument.');
+    throwErrorIf((arguments.length < 1), 'ARGUMENT_EXCEPTION: .del() requires at least 1 argument.');
     log(false, '.del() called:', {keys: keys});
     if(typeof keys === 'object'){
       for(var i = 0; i < keys.length; i++){
@@ -186,7 +186,7 @@ function cacheModule(config){
         storageKey = 'cache-module-storage-mock';
       }
       else{
-        var storageType = (config.storage && (config.storage === 'local' || config.storage === 'session')) ? config.storage : 'session';
+        var storageType = (config.storage === 'local') ? 'local' : 'session';
         store = (typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
         storageKey = 'cache-module-' + storageType + '-storage';
       }
@@ -216,11 +216,11 @@ function cacheModule(config){
   }
 
   /**
-   * Throw an error if insufficient arguments were provided
+   * Throw a given error if error is true
    * @param {boolean} error
    * @param {string} message
    */
-  function checkMinParams(error, message){
+  function throwErrorIf(error, message){
     if(error) throw new Error(message);
   }
 
