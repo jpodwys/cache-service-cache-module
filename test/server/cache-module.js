@@ -1,11 +1,15 @@
 var expect = require('expect');
+var mockStorage = require('mock-localstorage');
+var storageMock = new mockStorage();
 var cModule = require('../../cacheModule');
 var cacheModule = new cModule({
-  backgroundRefreshInterval: 500
+  backgroundRefreshInterval: 500,
+  storageMock: storageMock
 });
 
 var key = 'key';
 var value = 'value';
+var mockName = 'cache-module-storage-mock';
 
 beforeEach(function(){
   cacheModule.flush();
@@ -22,6 +26,8 @@ describe('cacheModule Tests', function () {
     cacheModule.set(key, value);
     cacheModule.get(key, function (err, result) {
       expect(result).toBe(value);
+      var data = storageMock.getItem(mockName);
+      expect(data.indexOf('key')).toBeGreaterThan(-1);
       done();
     });
   });
@@ -30,6 +36,8 @@ describe('cacheModule Tests', function () {
     cacheModule.del(key);
     cacheModule.get(key, function (err, result) {
       expect(result).toBe(null);
+      var data = storageMock.getItem(mockName);
+      expect(data.indexOf('key')).toBe(-1);
       done();
     });
   });
@@ -44,6 +52,10 @@ describe('cacheModule Tests', function () {
         expect(response).toBe(null);
         cacheModule.get(key, function (err, response){
           expect(response).toBe(null);
+          var data = storageMock.getItem(mockName);
+          expect(data.indexOf(key)).toBe(-1);
+          expect(data.indexOf('key2')).toBe(-1);
+          expect(data.indexOf('key3')).toBe(-1);
           done();
         });
       });
@@ -68,6 +80,11 @@ describe('cacheModule Tests', function () {
       expect(response.key2).toBe('value2');
       expect(response.key3).toBe('value3');
       expect(response.key4).toBe(undefined);
+      var data = storageMock.getItem(mockName);
+      expect(data.indexOf(key)).toBeGreaterThan(-1);
+      expect(data.indexOf('key2')).toBeGreaterThan(-1);
+      expect(data.indexOf('key3')).toBeGreaterThan(-1);
+      expect(data.indexOf('key4')).toBe(-1);
       done();
     });
   });
