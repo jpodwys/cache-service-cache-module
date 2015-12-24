@@ -186,9 +186,9 @@ function cacheModule(config){
         storageKey = 'cache-module-storage-mock';
       }
       else{
-        var storageType = (config.storage === 'local') ? 'local' : 'session';
-        store = (typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
-        storageKey = 'cache-module-' + storageType + '-storage';
+        var storageType = (config.storage === 'local' || config.storage === 'session') ? config.storage : null;
+        store = (storageType && typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
+        storageKey = (storageType) ? 'cache-module-' + storageType + '-storage' : null;
       }
       if(store){
         var db = store.getItem(storageKey);

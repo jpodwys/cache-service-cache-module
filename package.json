@@ -1,6 +1,6 @@
 {
   "name": "cache-service-cache-module",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A cache plugin for cache-service.",
   "main": "cacheModule.js",
   "devDependencies": {
