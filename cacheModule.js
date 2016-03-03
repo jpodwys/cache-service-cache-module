@@ -33,6 +33,8 @@ function cacheModule(config){
     expirations: {},
     refreshKeys: {}
   };
+  var storageKey;
+
   setupBrowserStorage();
   log(false, 'Cache-module client created with the following defaults:', {type: self.type, defaultExpiration: self.defaultExpiration, verbose: self.verbose, readOnly: self.readOnly});
 
@@ -123,7 +125,7 @@ function cacheModule(config){
   self.mset = function(obj, expiration, cb){
     throwErrorIf((arguments.length < 1), 'ARGUMENT_EXCEPTION: .mset() requires at least 1 argument.');
     log(false, '.mset() called:', {data: obj});
-    for(key in obj){
+    for(var key in obj){
       if(obj.hasOwnProperty(key)){
         var tempExpiration = expiration || self.defaultExpiration;
         var value = obj[key];
