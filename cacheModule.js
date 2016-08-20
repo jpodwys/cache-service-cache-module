@@ -252,21 +252,30 @@ function cacheModule(config){
   }
 
   /**
+   * Handle the refresh callback from the consumer, save the data to redis.
+   *
+   * @param {string} key The key used to save.
+   * @param {Object} data refresh keys data.
+   * @param {Error|null} err consumer callback failure.
+   * @param {*} response The consumer response.
+   */
+  function handleRefreshResponse (key, data, err, response) {
+    if(!err) {
+      this.set(key, response, (data.lifeSpan / 1000), data.refresh, function(){});
+    }
+  }
+
+  /**
    * Refreshes all keys that were set with a refresh function
    */
-  function backgroundRefresh(){
-    for(key in cache.refreshKeys){
-      if(cache.refreshKeys.hasOwnProperty(key)){
-        var data = cache.refreshKeys[key];
-        if(data.expiration - Date.now() < self.backgroundRefreshMinTtl){
-          data.refresh(key, function (err, response){
-            if(!err){
-              self.set(key, response, (data.lifeSpan / 1000), data.refresh, function(){});
-            }
-          });
-        }
+  function backgroundRefresh() {
+    var keys = Object.keys(cache.refreshKeys);
+    keys.forEach(function(key) {
+      var data = cache.refreshKeys[key];
+      if(data.expiration - Date.now() < this.backgroundRefreshMinTtl){
+        data.refresh(key, handleRefreshResponse.bind(this, key, data));
       }
-    }
+    }, self);
   }
 
   /**

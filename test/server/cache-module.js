@@ -101,4 +101,54 @@ describe('cacheModule Tests', function () {
       }, 1500);
     });
   });
+  it('Using background refresh should work for multiple keys', function (done) {
+    function noop() {}
+    this.timeout(5000);
+    var refresh = function(key, cb){
+      switch(key) {
+        case 'one':
+          setTimeout(function() {
+            cb(null, 1);
+          }, 100);
+          break;
+        case 'two':
+          setTimeout(function() {
+            cb(null, 2);
+          }, 100);
+          break;
+      }
+    };
+
+    cacheModule.set('one', value, 1, refresh, noop);
+    cacheModule.set('two', value, 1, refresh, noop);
+
+    setTimeout(function() {
+      var results = [];
+      function examineResults() {
+        results.forEach(function(result) {
+          if (result.key === 'one') {
+            expect(result.response).toBe(1);
+          } else {
+            expect(result.response).toBe(2);
+          }
+        });
+
+        done();
+      }
+      cacheModule.get('one', function (err, response){
+        results.push({key: 'one', response: response});
+        if (results.length === 2) {
+          examineResults();
+        }
+      });
+      cacheModule.get('two', function (err, response){
+        results.push({key: 'two', response: response});
+        if (results.length === 2) {
+          examineResults();
+        }
+      });
+
+    }, 1500);
+  });
+
 });
