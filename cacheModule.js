@@ -287,13 +287,7 @@ function cacheModule(config){
    * @param {object} obj
    */
   function cloneObject(obj){
-    var newObj = {};
-    for(var attr in obj) {
-      if (obj.hasOwnProperty(attr)){
-        newObj[attr] = obj[attr];
-      }
-    }
-    return newObj;
+    return JSON.parse(JSON.stringify(obj));
   }
 
   /**
