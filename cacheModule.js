@@ -198,6 +198,7 @@ function cacheModule(config){
           cache = JSON.parse(db) || cache;
         } catch (err) { /* Do nothing */ }
       }
+      // If storageType is set but store is not, the desired storage mechanism was not available
       else if(storageType){
         log(true, 'Browser storage is not supported by this browser. Defaulting to an in-memory cache.');
       }
