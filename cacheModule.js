@@ -198,7 +198,7 @@ function cacheModule(config){
           cache = JSON.parse(db) || cache;
         } catch (err) { /* Do nothing */ }
       }
-      else{
+      else if(config.storage !== 'memory'){
         log(true, 'Browser storage is not supported by this browser. Defaulting to an in-memory cache.');
       }
     }
