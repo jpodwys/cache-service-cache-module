@@ -86,6 +86,13 @@ When false, `cache-service-cache-module` will log only errors. When true, `cache
 * type: boolean
 * default: false
 
+## readOnly
+
+Whether a cache should not be written to. Useful if you're sharing a redis cache with another team and your contract with them is that you will not alter their data.
+
+* type: boolean
+* default: false
+
 # API
 
 As a `cache-service`-compatible cache, `cache-service-cache-module` matches [`cache-service`'s API](https://github.com/jpodwys/cache-service#api).
