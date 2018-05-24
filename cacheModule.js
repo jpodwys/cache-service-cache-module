@@ -190,7 +190,7 @@ function cacheModule(config){
       else{
         var storageType = (config.storage === 'local' || config.storage === 'session') ? config.storage : null;
         store = (storageType && typeof Storage !== void(0)) ? window[storageType + 'Storage'] : false;
-        storageKey = (storageType) ? 'cache-module-' + storageType + '-storage' : null;
+        storageKey = (storageType) ? self.type + '-' + storageType + '-storage' : null;
       }
       if(store){
         var db = store.getItem(storageKey);

@@ -34,7 +34,7 @@ cacheModule.set('key', 'value');
 
 ## type
 
-An arbitrary identifier you can assign so you know which cache is responsible for logs and errors.
+An arbitrary identifier you can assign so you know which cache is responsible for logs and errors. **IMPORTANT** If you use more than one instance of `cache-service-cache-module` at a time and persist to browser storage from both of them, you must set this to a unique value. If you do not, your cache instances will overwrite each other when persisting to browser storage.
 
 * type: string
 * default: 'cache-module'
