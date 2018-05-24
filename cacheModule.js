@@ -185,7 +185,7 @@ function cacheModule(config){
     if(browser || storageMock){
       if(storageMock){
         store = storageMock;
-        storageKey = self.type + '-storage-mock';
+        storageKey = 'cache-module-storage-mock';
       }
       else{
         var storageType = (config.storage === 'local' || config.storage === 'session') ? config.storage : null;
