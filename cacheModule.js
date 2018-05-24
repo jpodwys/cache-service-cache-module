@@ -50,7 +50,11 @@ function cacheModule(config){
       var now = Date.now();
       var expiration = cache.expirations[key];
       if(expiration > now){
-        cb(null, cache.db[key]);
+        var output = cache.db[key];
+        if(typeof output === 'object'){
+          output = cloneObject(output);
+        }
+        cb(null, output);
       }
       else{
         expire(key);
@@ -277,6 +281,14 @@ function cacheModule(config){
         data.refresh(key, handleRefreshResponse.bind(this, key, data));
       }
     }, self);
+  }
+
+  /**
+   * Return a clone of an object
+   * @param {object} obj
+   */
+  function cloneObject(obj){
+    return JSON.parse(JSON.stringify(obj));
   }
 
   /**
