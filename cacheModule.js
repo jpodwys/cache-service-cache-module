@@ -217,8 +217,8 @@ function cacheModule(config){
       var db = cache;
       try {
         db = JSON.stringify(db);
+        store.setItem(storageKey, db);
       } catch (err) { /* Do nothing */ }
-      store.setItem(storageKey, db);
     }
   }
 
