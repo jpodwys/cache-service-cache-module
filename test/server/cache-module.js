@@ -15,6 +15,10 @@ beforeEach(function(){
   cacheModule.flush();
 });
 
+after(function(){
+  cacheModule.flush();
+});
+
 describe('cacheModule Tests', function () {
   it('Getting absent key should return null', function (done) {
     cacheModule.get(key, function (err, result){
@@ -92,7 +96,7 @@ describe('cacheModule Tests', function () {
     var refresh = function(key, cb){
       cb(null, 1);
     }
-    cacheModule.set(key, value, 1, refresh, function (err, result){ 
+    cacheModule.set(key, value, 1, refresh, function (err, result){
       setTimeout(function(){
         cacheModule.get(key, function (err, response){
           expect(response).toBe(1);

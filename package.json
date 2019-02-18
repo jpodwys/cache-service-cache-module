@@ -1,11 +1,11 @@
 {
   "name": "cache-service-cache-module",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A cache plugin for cache-service.",
   "main": "cacheModule.js",
   "devDependencies": {
-    "mocha": "2.2.4",
     "expect": "1.6.0",
+    "mocha": "^5.2.0",
     "mock-localstorage": "0.1.3"
   },
   "scripts": {

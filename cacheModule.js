@@ -34,6 +34,7 @@ function cacheModule(config){
     refreshKeys: {}
   };
   var storageKey;
+  var interval;
 
   setupBrowserStorage();
   log(false, 'Cache-module client created with the following defaults:', {type: self.type, defaultExpiration: self.defaultExpiration, verbose: self.verbose, readOnly: self.readOnly});
@@ -164,7 +165,7 @@ function cacheModule(config){
       delete cache.db[keys];
       delete cache.expirations[keys];
       delete cache.refreshKeys[keys];
-      if(cb) cb(null, 1); 
+      if(cb) cb(null, 1);
     }
     overwriteBrowserStorage();
   }
@@ -180,6 +181,8 @@ function cacheModule(config){
     cache.refreshKeys = {};
     if(cb) cb();
     overwriteBrowserStorage();
+    if(interval) clearInterval(interval);
+    backgroundRefreshEnabled = false;
   }
 
   /**
@@ -217,8 +220,8 @@ function cacheModule(config){
       var db = cache;
       try {
         db = JSON.stringify(db);
+        store.setItem(storageKey, db);
       } catch (err) { /* Do nothing */ }
-      store.setItem(storageKey, db);
     }
   }
 
@@ -252,7 +255,7 @@ function cacheModule(config){
           throw new Error('BACKGROUND_REFRESH_INTERVAL_EXCEPTION: backgroundRefreshInterval cannot be greater than backgroundRefreshMinTtl.');
         }
       }
-      setInterval(backgroundRefresh, self.backgroundRefreshInterval);
+      interval = setInterval(backgroundRefresh, self.backgroundRefreshInterval);
     }
   }
 
